@@ -1,0 +1,46 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+queue:
+  name: Hosted Ubuntu 1604
+
+variables:
+- group: 'TerraformVars'
+- group: 'spcreds'
+- name: state-key
+  value: 'saphana.azure-terraform-lab.master.tfstate'
+
+steps:
+
+- script: |
+   terraform init \
+       -backend-config="resource_group_name=$(resource-group)" \
+       -backend-config="storage_account_name=$(storage-account)" \
+       -backend-config="container_name=$(container-name)" \
+       -backend-config="key=$(state-key)" \
+       -backend-config="access_key=$(access-key)"
+  workingDirectory: ./env/deploy/vm/modules/single_node_hana
+  displayName: 'Terraform init'
+
+#- script: |
+#    export AZURE_SUBSCRIPTION_ID='d0337c1a-1035-4759-8970-cf023698b0a8'
+#    export AZURE_CLIENT_ID='364c0a45-fcf2-4fa2-a63d-46fc4f63ee45'
+#    export AZURE_SECRET='c89ee507-65e8-4f15-b9db-a5d9d1e90508'
+#    export AZURE_TENANT='d78c4cca-ee40-487b-9daf-c04e42b56085'
+#    export ARM_SUBSCRIPTION_ID='d0337c1a-1035-4759-8970-cf023698b0a8'
+#    export ARM_CLIENT_ID='364c0a45-fcf2-4fa2-a63d-46fc4f63ee45'
+#    export ARM_CLIENT_SECRET='c89ee507-65e8-4f15-b9db-a5d9d1e90508'
+#    export ARM_TENANT_ID='d78c4cca-ee40-487b-9daf-c04e42b56085'
+#  displayName: 'load creds'
+- script: |
+
+   terraform apply --auto-approve \
+       -var-file='terraform.tfvars'\
+       -var 'client-id=$(client-id)' \
+       -var 'client-secret=$(client-secret)' \
+       -var 'subscription-id=$(subscription-id)' \
+       -var 'tenant-id=$(tenant-id)'
+  workingDirectory: ./env/deploy/vm/modules/single_node_hana
+  displayName: 'Terraform plan'
